@@ -13,13 +13,13 @@ public class Utility {
 
     public static List<FollowableUser> createSampleFollowableUserList() {
         List<FollowableUser> followableUsers = new ArrayList<>();
-        followableUsers.add(new FollowableUser("1", "John", "Doe",
+        followableUsers.add(new FollowableUser("1", "Joseph", "Murphy",
                 true, "Mar 07, 2024, 10:54 PM"));
-        followableUsers.add(new FollowableUser("2", "Jane", "Doe",
+        followableUsers.add(new FollowableUser("2", "Deepthi", "Senthil",
                 false, "Mar 05, 2024, 11:00 AM"));
-        followableUsers.add(new FollowableUser("3", "Alice", "Smith",
+        followableUsers.add(new FollowableUser("3", "Reneka", "Yadav",
                 true, "Mar 06, 2024, 09:30 AM"));
-        followableUsers.add(new FollowableUser("4", "Bob", "Brown",
+        followableUsers.add(new FollowableUser("4", "Anthony", "Copeland",
                 false, "Mar 02, 2024, 08:15 PM"));
         return followableUsers;
     }
@@ -48,15 +48,15 @@ public class Utility {
         User user5 = new User("5", "Charlie", "Green");
         List<Comment> commentsForPost = new ArrayList<>();
 
-        commentsForPost.add(new Comment("1", "Great insights, thanks for sharing!", 
-            "Mar 07, 2024, 10:54 PM", user2));
-        commentsForPost.add(new Comment("2", "I'm looking forward to trying this out.", 
-            "Mar 08, 2024, 11:00 AM", user4));
-        commentsForPost.add(new Comment("3", "Can you provide more examples in your next post?", 
-            "Mar 09, 2024, 09:30 AM", user5));
-        ExpandedPost postWithComments = new ExpandedPost("4", "Advanced Techniques " + 
-            "in Spring Security", "Mar 10, 2024, 08:15 PM", user1, 25, 
-            commentsForPost.size(), false, true, commentsForPost);
+        commentsForPost.add(new Comment("1", "Great insights, thanks for sharing!",
+                "Mar 07, 2024, 10:54 PM", user2));
+        commentsForPost.add(new Comment("2", "I'm looking forward to trying this out.",
+                "Mar 08, 2024, 11:00 AM", user4));
+        commentsForPost.add(new Comment("3", "Can you provide more examples in your next post?",
+                "Mar 09, 2024, 09:30 AM", user5));
+        ExpandedPost postWithComments = new ExpandedPost("4", "Advanced Techniques " +
+                "in Spring Security", "Mar 10, 2024, 08:15 PM", user1, 25,
+                commentsForPost.size(), false, true, commentsForPost);
         return List.of(postWithComments);
     }
 

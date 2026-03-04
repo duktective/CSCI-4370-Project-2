@@ -30,7 +30,8 @@ public class FollowableUser extends User {
      * @param profileImageName the name of the profile image file for the user
      * @param isFollowed       the follow status of the user by the current session
      *                         user
-     * @param lastActiveDate   the date and time that this user has last made a post.
+     * @param lastActiveDate   the date and time that this user has last made a
+     *                         post.
      */
     public FollowableUser(String userId, String firstName, String lastName, String profileImageName,
             boolean isFollowed, String lastActiveDate) {
@@ -42,12 +43,12 @@ public class FollowableUser extends User {
     /**
      * Constructs a FollowableUser with specified details and follow status.
      *
-     * @param userId           the unique identifier of the user
-     * @param firstName        the first name of the user
-     * @param lastName         the last name of the user
-     * @param isFollowed       the follow status of the user by the current session
-     *                         user
-     * @param lastActiveDate   the date and time that this user has last made a post.
+     * @param userId         the unique identifier of the user
+     * @param firstName      the first name of the user
+     * @param lastName       the last name of the user
+     * @param isFollowed     the follow status of the user by the current session
+     *                       user
+     * @param lastActiveDate the date and time that this user has last made a post.
      */
     public FollowableUser(String userId, String firstName, String lastName,
             boolean isFollowed, String lastActiveDate) {
@@ -75,4 +76,12 @@ public class FollowableUser extends User {
         return lastActiveDate;
     }
 
+    /**
+     * Returns the last active date and time of the user.
+     *
+     * @return the date and time that this user has last made a post.
+     */
+    public String getLastActiveDate() {
+        return lastActiveDate;
+    }
 }

@@ -23,7 +23,7 @@ import uga.menik.csx370.models.User;
  * This is a service class that enables user related functions.
  * The class interacts with the database through a dataSource instance.
  * See authenticate and registerUser functions for examples.
- * This service object is spcial. It's lifetime is limited to a user session.
+ * This service object is special. It's lifetime is limited to a user session.
  * Usual services generally have application lifetime.
  */
 @Service
@@ -34,7 +34,7 @@ public class UserService {
     private final DataSource dataSource;
     // passwordEncoder is used for password security.
     private final BCryptPasswordEncoder passwordEncoder;
-    // This holds 
+    // This holds
     private User loggedInUser = null;
 
     /**
@@ -53,7 +53,8 @@ public class UserService {
      * Returns true if authentication is succesful. False otherwise.
      */
     public boolean authenticate(String username, String password) throws SQLException {
-        // Note the ? mark in the query. It is a place holder that we will later replace.
+        // Note the ? mark in the query. It is a place holder that we will later
+        // replace.
         final String sql = "select * from user where username = ?";
         try (Connection conn = dataSource.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -63,13 +64,13 @@ public class UserService {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 // Traverse the result rows one at a time.
-                // Note: This specific while loop will only run at most once 
+                // Note: This specific while loop will only run at most once
                 // since username is unique.
                 while (rs.next()) {
                     // Note: rs.get.. functions access attributes of the current row.
                     String storedPasswordHash = rs.getString("password");
                     boolean isPassMatch = passwordEncoder.matches(password, storedPasswordHash);
-                    // Note: 
+                    // Note:
                     if (isPassMatch) {
                         String userId = rs.getString("userId");
                         String firstName = rs.getString("firstName");
@@ -114,7 +115,8 @@ public class UserService {
      */
     public boolean registerUser(String username, String password, String firstName, String lastName)
             throws SQLException {
-        // Note the ? marks in the SQL statement. They are placeholders like mentioned above.
+        // Note the ? marks in the SQL statement. They are placeholders like mentioned
+        // above.
         final String registerSql = "insert into user (username, password, firstName, lastName) values (?, ?, ?, ?)";
 
         try (Connection conn = dataSource.getConnection();

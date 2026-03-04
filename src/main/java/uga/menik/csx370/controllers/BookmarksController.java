@@ -19,7 +19,7 @@ import uga.menik.csx370.utility.Utility;
  * Handles /bookmarks and its sub URLs.
  * No other URLs at this point.
  * 
- * Learn more about @Controller here: 
+ * Learn more about @Controller here:
  * https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller.html
  */
 @Controller
@@ -38,6 +38,7 @@ public class BookmarksController {
 
         // Following line populates sample data.
         // You should replace it with actual data from the database.
+
         List<Post> posts = Utility.createSamplePostsListWithoutComments();
         mv.addObject("posts", posts);
 
@@ -52,5 +53,5 @@ public class BookmarksController {
 
         return mv;
     }
-    
+
 }
