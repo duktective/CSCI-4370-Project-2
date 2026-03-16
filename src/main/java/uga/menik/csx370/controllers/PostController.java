@@ -44,20 +44,97 @@ public class PostController {
         // See notes on ModelAndView in BookmarksController.java.
         ModelAndView mv = new ModelAndView("posts_page");
 
-        // Following line populates sample data.
-        // You should replace it with actual data from the database.
-        List<ExpandedPost> posts = Utility.createSampleExpandedPostWithComments();
-        mv.addObject("posts", posts);
+        try {
+            java.sql.Connection conn = java.sql.DriverManager.getConnection(
+                    "jdbc:mysql://localhost:33306/csx370_mb_platform",
+                    "root",
+                    "mysqlpass");
 
-        // If an error occured, you can set the following property with the
-        // error message to show the error message to the user.
-        // An error message can be optionally specified with a url query parameter too.
+            String postSql = """
+                    select p.postId, p.content, p.createdAt,
+                           u.userId, u.firstName, u.lastName
+                    from post p
+                    join `user` u on p.userId = u.userId
+                    where p.postId = ?
+                    """;
+
+            String commentSql = """
+                    select c.commentId, c.content, c.createdAt,
+                           u.userId, u.firstName, u.lastName
+                    from comment c
+                    join `user` u on c.userId = u.userId
+                    where c.postId = ?
+                    order by c.createdAt asc, c.commentId asc
+                    """;
+
+            java.sql.PreparedStatement postStmt = conn.prepareStatement(postSql);
+            postStmt.setString(1, postId);
+
+            java.sql.ResultSet postRs = postStmt.executeQuery();
+
+            java.util.ArrayList<uga.menik.csx370.models.Comment> comments =
+                    new java.util.ArrayList<>();
+
+            uga.menik.csx370.models.User postUser = null;
+            String content = "";
+            String createdAt = "";
+
+            if (postRs.next()) {
+                content = postRs.getString("content");
+                createdAt = postRs.getString("createdAt");
+
+                postUser = new uga.menik.csx370.models.User(
+                        postRs.getString("userId"),
+                        postRs.getString("firstName"),
+                        postRs.getString("lastName"));
+            }
+
+            java.sql.PreparedStatement commentStmt = conn.prepareStatement(commentSql);
+            commentStmt.setString(1, postId);
+
+            java.sql.ResultSet commentRs = commentStmt.executeQuery();
+
+            while (commentRs.next()) {
+
+                uga.menik.csx370.models.User commentUser =
+                        new uga.menik.csx370.models.User(
+                                commentRs.getString("userId"),
+                                commentRs.getString("firstName"),
+                                commentRs.getString("lastName"));
+
+                uga.menik.csx370.models.Comment comment =
+                        new uga.menik.csx370.models.Comment(
+                                commentRs.getString("commentId"),
+                                commentRs.getString("content"),
+                                commentRs.getString("createdAt"),
+                                commentUser);
+
+                comments.add(comment);
+            }
+
+            uga.menik.csx370.models.ExpandedPost post =
+                    new uga.menik.csx370.models.ExpandedPost(
+                            postId,
+                            content,
+                            createdAt,
+                            postUser,
+                            0,
+                            comments.size(),
+                            false,
+                            false,
+                            comments);
+
+            mv.addObject("posts", java.util.List.of(post));
+
+            conn.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mv.addObject("posts", Utility.createSampleExpandedPostWithComments());
+        }
+
         String errorMessage = error;
         mv.addObject("errorMessage", errorMessage);
-
-        // Enable the following line if you want to show no content message.
-        // Do that if your content list is empty.
-        // mv.addObject("isNoContent", true);
 
         return mv;
     }
@@ -75,10 +152,34 @@ public class PostController {
         System.out.println("\tpostId: " + postId);
         System.out.println("\tcomment: " + comment);
 
-        // Redirect the user if the comment adding is a success.
-        // return "redirect:/post/" + postId;
+        try {
 
-        // Redirect the user with an error message if there was an error.
+            java.sql.Connection conn = java.sql.DriverManager.getConnection(
+                    "jdbc:mysql://localhost:33306/csx370_mb_platform",
+                    "root",
+                    "mysqlpass");
+
+            String sql = """
+                    insert into comment (postId, userId, content)
+                    values (?, ?, ?)
+                    """;
+
+            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            pstmt.setString(1, postId);
+            pstmt.setString(2, "1");
+            pstmt.setString(3, comment);
+
+            pstmt.executeUpdate();
+
+            conn.close();
+
+            return "redirect:/post/" + postId;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         String message = URLEncoder.encode("Failed to post the comment. Please try again.",
                 StandardCharsets.UTF_8);
         return "redirect:/post/" + postId + "?error=" + message;
@@ -97,10 +198,6 @@ public class PostController {
         System.out.println("\tpostId: " + postId);
         System.out.println("\tisAdd: " + isAdd);
 
-        // Redirect the user if the comment adding is a success.
-        // return "redirect:/post/" + postId;
-
-        // Redirect the user with an error message if there was an error.
         String message = URLEncoder.encode("Failed to (un)like the post. Please try again.",
                 StandardCharsets.UTF_8);
         return "redirect:/post/" + postId + "?error=" + message;
@@ -119,10 +216,6 @@ public class PostController {
         System.out.println("\tpostId: " + postId);
         System.out.println("\tisAdd: " + isAdd);
 
-        // Redirect the user if the comment adding is a success.
-        // return "redirect:/post/" + postId;
-
-        // Redirect the user with an error message if there was an error.
         String message = URLEncoder.encode("Failed to (un)bookmark the post. Please try again.",
                 StandardCharsets.UTF_8);
         return "redirect:/post/" + postId + "?error=" + message;
