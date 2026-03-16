@@ -4,7 +4,7 @@ Using database concepts like ER modeling, relational schema design, SQL queries,
 
 Team Members & their Responsibilities:
 
-Anthony - Posts & Hashtags
-Joey - Follow System & Home Feed
-Anudeepthi - Comments & Documentation
-Reneka - Likes, Bookmarks & New Feature
+* Anthony - Posts & Hashtags
+* Joey - Follow System & Home Feed
+* Anudeepthi - Comments & Documentation
+* Reneka - Likes, Bookmarks & New Feature
