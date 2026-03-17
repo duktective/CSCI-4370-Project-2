@@ -1,10 +1,10 @@
--- Create the database.
+-- Create Database
 create database if not exists csx370_mb_platform;
 
--- Use the created database.
+
 use csx370_mb_platform;
 
--- Create the user table.
+-- User Table
 create table if not exists user (
     userId int auto_increment,
     username varchar(255) not null,
@@ -18,7 +18,7 @@ create table if not exists user (
     constraint lastName_min_length check (char_length(trim(lastName)) >= 2)
 );
 
--- Create the posts table
+-- Posts Table
 create table if not exists post (
     postId int auto_increment,
     userId int not null,
@@ -28,7 +28,7 @@ create table if not exists post (
     foreign key (userId) references `user`(userId) on delete cascade
 );
 
--- Create the comments table
+-- Comments Table
 create table if not exists comment (
     commentId int auto_increment,
     postId int not null,
@@ -40,7 +40,7 @@ create table if not exists comment (
     foreign key (userId) references `user`(userId) on delete cascade
 );
 
--- Create the likes table
+-- Likes Table
 create table if not exists postLike (
     userId int not null,
     postId int not null,
@@ -50,7 +50,7 @@ create table if not exists postLike (
     foreign key (postId) references post(postId) on delete cascade
 );
 
--- Create the bookmarks table
+-- Bookmarks Table
 create table if not exists bookmark (
     userId int not null,
     postId int not null,
@@ -60,7 +60,7 @@ create table if not exists bookmark (
     foreign key (postId) references post(postId) on delete cascade
 );
 
--- Create the follows table
+-- Follows Table
 create table if not exists follow (
     followerId int not null,
     followeeId int not null,
@@ -70,7 +70,7 @@ create table if not exists follow (
     foreign key (followeeId) references `user`(userId) on delete cascade
 );
 
--- Create the hashtags table
+-- Hashtags Table
 create table if not exists hashtag (
     hashtagId int auto_increment,
     tag varchar(100) not null,
@@ -78,7 +78,7 @@ create table if not exists hashtag (
     unique (tag)
 );
 
--- Create the postHashtag table (many-to-many relation)
+-- postHashtag Table
 create table if not exists postHashtag (
     postId int not null,
     hashtagId int not null,
