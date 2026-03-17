@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
 import com.mysql.cj.jdbc.MysqlDataSource;
 
 import uga.menik.csx370.models.FollowableUser;
-import uga.menik.csx370.utility.Utility;
+import uga.menik.csx370.models.Post;
+import uga.menik.csx370.models.User;
 
 /**
  * This service contains people related functions.
@@ -57,19 +58,27 @@ public class PeopleService {
 
         List<FollowableUser> fin = new ArrayList<>();
         String command = """
-                    SELECT userId, firstName, lastName
-                    FROM user
-                    WHERE userId <> ?
+                SELECT
+                    u.userId,
+                    u.firstName,
+                    u.lastName,
+                    f.followerId
+                FROM user u
+                LEFT JOIN follow f
+                    ON u.userId = f.followeeId
+                    AND f.followerId = ?
+                WHERE u.userId <> ?
                 """;
         try (Connection con = dataSource.getConnection();
                 PreparedStatement stm = con.prepareStatement(command)) {
             stm.setString(1, userIdToExclude);
+            stm.setString(2, userIdToExclude);
             try (ResultSet rs = stm.executeQuery()) {
                 while (rs.next()) {
                     String userId = rs.getString("userId");
                     String firstName = rs.getString("firstName");
                     String lastName = rs.getString("lastName");
-                    boolean isFollowed = false;
+                    boolean isFollowed = rs.getString("followerId") != null;
                     String lastActiveDate = "NA";
 
                     fin.add(new FollowableUser(userId, firstName, lastName, isFollowed, lastActiveDate));
@@ -78,5 +87,79 @@ public class PeopleService {
             return fin;
         }
 
+    }
+
+    public void followUser(String followerId, String followeeId) throws SQLException {
+
+        String sql = """
+                INSERT INTO follow (followerId, followeeId)
+                VALUES (?, ?)
+                """;
+
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, followerId);
+            pstmt.setString(2, followeeId);
+
+            pstmt.executeUpdate();
+        }
+    }
+
+    public void unfollowUser(String followerId, String followeeId) throws SQLException {
+
+        String sql = """
+                DELETE FROM follow
+                WHERE followerId = ? AND followeeId = ?
+                """;
+
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, followerId);
+            pstmt.setString(2, followeeId);
+
+            pstmt.executeUpdate();
+        }
+    }
+
+    public List<Post> getPostsByUser(String userId) throws SQLException {
+        List<Post> fin = new ArrayList<>();
+        String command = """
+                SELECT p.postId, p.content, p.createdAt,
+                       u.userId, u.firstName, u.lastName
+                FROM post p
+                JOIN user u ON p.userId = u.userId
+                WHERE p.userId = ?
+                ORDER BY p.createdAt DESC
+                """;
+
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement stm = conn.prepareStatement(command)) {
+
+            stm.setString(1, userId);
+
+            try (ResultSet rs = stm.executeQuery()) {
+
+                while (rs.next()) {
+
+                    String postId = rs.getString("postId");
+                    String content = rs.getString("content");
+                    String createdAt = rs.getString("createdAt");
+                    String uId = rs.getString("userId");
+                    String firstName = rs.getString("firstName");
+                    String lastName = rs.getString("lastName");
+                    User user = new User(uId, firstName, lastName);
+                    int likeCount = 0;
+                    int commentCount = 0;
+                    boolean isLiked = false;
+                    boolean isBookmarked = false;
+
+                    fin.add(new Post(postId, content, createdAt, user, likeCount, commentCount, isLiked, isBookmarked));
+                }
+            }
+        }
+
+        return fin;
     }
 }

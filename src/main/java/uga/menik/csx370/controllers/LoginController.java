@@ -30,7 +30,7 @@ public class LoginController {
     private final UserService userService;
 
     /**
-     * See notes in AuthInterceptor.java regarding how this works 
+     * See notes in AuthInterceptor.java regarding how this works
      * through dependency injection and inversion of control.
      */
     @Autowired
@@ -62,7 +62,8 @@ public class LoginController {
 
     /**
      * This handles the /login form submission.
-     * See notes in HomeController.java regardig /createpost form submission handler.
+     * See notes in HomeController.java regardig /createpost form submission
+     * handler.
      */
     @PostMapping
     public String login(@RequestParam("username") String username,

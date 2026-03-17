@@ -107,8 +107,27 @@ public class PeopleController {
         System.out.println("\tuserId: " + userId);
         System.out.println("\tisFollow: " + isFollow);
 
-        // Redirect the user if the comment adding is a success.
-        // return "redirect:/people";
+        try {
+            var loggedInUser = userService.getLoggedInUser();
+            if (loggedInUser == null) {
+                String message = URLEncoder.encode("You must be logged in to follow users.",
+                        StandardCharsets.UTF_8);
+                return "redirect:/people?error=" + message;
+            }
+            String loggedInUserId = loggedInUser.getUserId();
+            if (isFollow) {
+                peopleService.unfollowUser(loggedInUserId, userId);
+            } else {
+                peopleService.followUser(loggedInUserId, userId);
+            }
+            return "redirect:/people";
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            String message = URLEncoder.encode("Failed to (un)follow the user. Please try again.",
+                    StandardCharsets.UTF_8);
+            return "redirect:/people?error=" + message;
+        }
 
         // Redirect the user with an error message if there was an error.
         String message = URLEncoder.encode("Failed to (un)follow the user. Please try again.",
