@@ -192,12 +192,52 @@ public class PostController {
      * get type form submissions and how path variables work.
      */
     @GetMapping("/{postId}/heart/{isAdd}")
-    public String addOrRemoveHeart(@PathVariable("postId") String postId,
+public String addOrRemoveHeart(@PathVariable("postId") String postId,
             @PathVariable("isAdd") Boolean isAdd) {
         System.out.println("The user is attempting add or remove a heart:");
         System.out.println("\tpostId: " + postId);
         System.out.println("\tisAdd: " + isAdd);
 
+        try {
+            java.sql.Connection conn = java.sql.DriverManager.getConnection(
+                    "jdbc:mysql://localhost:33306/csx370_mb_platform",
+                    "root",
+                    "mysqlpass");
+
+            if (isAdd) {
+                String sql = """
+                        insert into postLike (userId, postId)
+                        values (?, ?)
+                        """;
+
+                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, "1");
+                pstmt.setString(2, postId);
+                pstmt.executeUpdate();
+            } else {
+                String sql = """
+                        delete from postLike
+                        where userId = ?
+                        and postId = ?
+                        """;
+
+                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, "1");
+                pstmt.setString(2, postId);
+                pstmt.executeUpdate();
+            }
+
+            conn.close();
+
+            // redirecting the user if the comment adding is a success
+            // returning "redirect:/post/" + postId;
+            return "redirect:/post/" + postId;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // redirecting the user with an error message if there error is present
         String message = URLEncoder.encode("Failed to (un)like the post. Please try again.",
                 StandardCharsets.UTF_8);
         return "redirect:/post/" + postId + "?error=" + message;
@@ -216,6 +256,46 @@ public class PostController {
         System.out.println("\tpostId: " + postId);
         System.out.println("\tisAdd: " + isAdd);
 
+        try {
+            java.sql.Connection conn = java.sql.DriverManager.getConnection(
+                    "jdbc:mysql://localhost:33306/csx370_mb_platform",
+                    "root",
+                    "mysqlpass");
+
+            if (isAdd) {
+                String sql = """
+                        insert into bookmark (userId, postId)
+                        values (?, ?)
+                        """;
+
+                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, "1");
+                pstmt.setString(2, postId);
+                pstmt.executeUpdate();
+            } else {
+                String sql = """
+                        delete from bookmark
+                        where userId = ?
+                        and postId = ?
+                        """;
+
+                java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, "1");
+                pstmt.setString(2, postId);
+                pstmt.executeUpdate();
+            }
+
+            conn.close();
+
+            // Redirect the user if the comment adding is a success.
+            // return "redirect:/post/" + postId;
+            return "redirect:/post/" + postId;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Redirect the user with an error message if there was an error.
         String message = URLEncoder.encode("Failed to (un)bookmark the post. Please try again.",
                 StandardCharsets.UTF_8);
         return "redirect:/post/" + postId + "?error=" + message;
