@@ -16,6 +16,8 @@ import org.springframework.web.servlet.ModelAndView;
 import uga.menik.csx370.models.Post;
 import uga.menik.csx370.utility.Utility;
 
+import uga.menik.csx370.services.PostService;
+
 /**
  * Handles /hashtagsearch URL and possibly others.
  * At this point no other URLs.
@@ -24,6 +26,10 @@ import uga.menik.csx370.utility.Utility;
 @RequestMapping("/hashtagsearch")
 public class HashtagSearchController {
 
+    private final PostService postService;
+    public HashtagSearchController(PostService postService) {
+        this.postService = postService;
+    }
     /**
      * This function handles the /hashtagsearch URL itself.
      * This URL can process a request parameter with name hashtags.
@@ -40,8 +46,35 @@ public class HashtagSearchController {
 
         // Following line populates sample data.
         // You should replace it with actual data from the database.
-        List<Post> posts = Utility.createSamplePostsListWithoutComments();
+       List<Post> posts = List.of();
+       try {
+        java.util.List<String> tags = new java.util.ArrayList<>();
+        String[] words = hashtags.split("\\s+");
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            if (word.startsWith("#") && word.length() > 1) {
+                String hashtag = word.substring(1).toLowerCase();
+                tags.add(hashtag);
+            }
+        }
+        
+
+            if (tags.isEmpty()) {
+                mv.addObject("posts", List.of());
+                mv.addObject("isNoContent", true);
+                return mv;
+            }
+
+            posts = postService.searchForHashtag(tags);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         mv.addObject("posts", posts);
+
+        if (posts.isEmpty()) {
+            mv.addObject("isNoContent", true);
+        }
 
         // If an error occured, you can set the following property with the
         // error message to show the error message to the user.
@@ -54,5 +87,3 @@ public class HashtagSearchController {
         
         return mv;
     }
-    
-}
