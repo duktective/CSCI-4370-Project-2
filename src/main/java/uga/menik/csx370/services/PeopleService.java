@@ -127,7 +127,12 @@ public class PeopleService {
         List<Post> fin = new ArrayList<>();
         String command = """
                 SELECT p.postId, p.content, p.createdAt,
-                       u.userId, u.firstName, u.lastName
+                       u.userId, u.firstName, u.lastName,
+                       (SELECT COUNT(*) FROM postLike l WHERE l.postId = p.postId) AS likeCount,
+                       (SELECT COUNT(*) FROM comment c WHERE c.postId = p.postId) AS commentCount,
+                       EXISTS(SELECT 1 FROM bookmark b WHERE b.postId = p.postId AND b.userId = ?) AS isBookmarked,
+                       EXISTS(SELECT 1 FROM postLike l2 WHERE l2.postId = p.postId AND l2.userId = ?) AS isLiked
+
                 FROM post p
                 JOIN user u ON p.userId = u.userId
                 WHERE p.userId = ?
@@ -137,7 +142,9 @@ public class PeopleService {
         try (Connection conn = dataSource.getConnection();
                 PreparedStatement stm = conn.prepareStatement(command)) {
 
-            stm.setString(1, userId);
+            stm.setString(1, userService.getLoggedInUser().getUserId());
+            stm.setString(2, userService.getLoggedInUser().getUserId());
+            stm.setString(3, userId);
 
             try (ResultSet rs = stm.executeQuery()) {
 
@@ -150,10 +157,10 @@ public class PeopleService {
                     String firstName = rs.getString("firstName");
                     String lastName = rs.getString("lastName");
                     User user = new User(uId, firstName, lastName);
-                    int likeCount = 0;
-                    int commentCount = 0;
-                    boolean isLiked = false;
-                    boolean isBookmarked = false;
+                    int likeCount = rs.getInt("likeCount");
+                    int commentCount = rs.getInt("commentCount");
+                    boolean isLiked = rs.getBoolean("isLiked");
+                    boolean isBookmarked = rs.getBoolean("isBookmarked");
 
                     fin.add(new Post(postId, content, createdAt, user, likeCount, commentCount, isLiked, isBookmarked));
                 }
