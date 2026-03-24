@@ -301,4 +301,37 @@ public String addOrRemoveHeart(@PathVariable("postId") String postId,
         return "redirect:/post/" + postId + "?error=" + message;
     }
 
+    @GetMapping("/{postId}/report")
+public String reportPost(@PathVariable("postId") String postId) {
+    System.out.println("User is reporting post: " + postId);
+
+    try {
+        java.sql.Connection conn = java.sql.DriverManager.getConnection(
+                "jdbc:mysql://localhost:33306/csx370_mb_platform",
+                "root",
+                "mysqlpass");
+
+        String sql = "INSERT INTO report (postId, userId, reason) VALUES (?, ?, ?)";
+
+        java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+
+        pstmt.setString(1, postId);
+        pstmt.setString(2, "1");
+        pstmt.setString(3, "Reported by user");
+
+        pstmt.executeUpdate();
+
+        conn.close();
+
+        return "redirect:/post/" + postId;
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    String message = URLEncoder.encode("Failed to report post.",
+            StandardCharsets.UTF_8);
+    return "redirect:/post/" + postId + "?error=" + message;
+}
+
 }
