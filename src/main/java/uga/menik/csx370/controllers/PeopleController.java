@@ -128,11 +128,6 @@ public class PeopleController {
                     StandardCharsets.UTF_8);
             return "redirect:/people?error=" + message;
         }
-
-        // Redirect the user with an error message if there was an error.
-        String message = URLEncoder.encode("Failed to (un)follow the user. Please try again.",
-                StandardCharsets.UTF_8);
-        return "redirect:/people?error=" + message;
     }
 
 }
