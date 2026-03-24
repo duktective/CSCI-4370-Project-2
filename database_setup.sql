@@ -86,3 +86,13 @@ create table if not exists postHashtag (
     foreign key (postId) references post(postId) on delete cascade,
     foreign key (hashtagId) references hashtag(hashtagId) on delete cascade
 );
+-- Report Table
+CREATE TABLE IF NOT EXISTS report (
+    reportId INT AUTO_INCREMENT PRIMARY KEY,
+    postId INT NOT NULL,
+    userId INT NOT NULL,
+    reason VARCHAR(255),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (postId) REFERENCES post(postId) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES `user`(userId) ON DELETE CASCADE
+);
