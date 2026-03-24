@@ -9,15 +9,22 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import uga.menik.csx370.services.PostService;
 
 import uga.menik.csx370.models.Post;
 import uga.menik.csx370.utility.Utility;
+
+import uga.menik.csx370.models.FollowableUser;
+import uga.menik.csx370.services.PeopleService;
+import uga.menik.csx370.services.PostService;
+import uga.menik.csx370.services.UserService;
 
 /**
  * This controller handles the home page and some of it's sub URLs.
@@ -25,6 +32,17 @@ import uga.menik.csx370.utility.Utility;
 @Controller
 @RequestMapping
 public class HomeController {
+
+    private UserService userService;
+    private PeopleService peopleService;
+    private PostService postService;
+   
+    public HomeController(UserService userService,PeopleService peopleService,
+        PostService postService) {
+        this.userService = userService;
+        this.peopleService = peopleService;
+        this.postService = postService;
+    }
 
     /**
      * This is the specific function that handles the root URL itself.
@@ -40,8 +58,15 @@ public class HomeController {
 
         // Following line populates sample data.
         // You should replace it with actual data from the database.
-        List<Post> posts = Utility.createSamplePostsListWithoutComments();
-        mv.addObject("posts", posts);
+       List<Post> posts = new java.util.ArrayList<>();
+       try {
+        posts = postService.retrievePosts();
+       } catch (Exception e) {
+        e.printStackTrace();
+       }
+       
+
+       mv.addObject("posts", posts);
 
         // If an error occured, you can set the following property with the
         // error message to show the error message to the user.
@@ -53,10 +78,14 @@ public class HomeController {
         // Do that if your content list is empty.
         // mv.addObject("isNoContent", true);
 
+        if (posts.isEmpty()) {
+            mv.addObject("isNoContent", true);
+        }
         return mv;
     }
 
     /**
+     * 
      * This function handles the /createpost URL.
      * This handles a post request that is going to be a form submission.
      * The form for this can be found in the home page. The form has a
@@ -68,6 +97,12 @@ public class HomeController {
     public String createPost(@RequestParam(name = "posttext") String postText) {
         System.out.println("User is creating post: " + postText);
 
+        try {
+            postService.createNewPost(postText);
+            return "redirect:/";
+        } catch (Exception e) {
+            e.printStackTrace();
+        
         // Redirect the user if the post creation is a success.
         // return "redirect:/";
 
@@ -75,6 +110,8 @@ public class HomeController {
         String message = URLEncoder.encode("Failed to create the post. Please try again.",
                 StandardCharsets.UTF_8);
         return "redirect:/?error=" + message;
+        }
     }
 
 }
+
