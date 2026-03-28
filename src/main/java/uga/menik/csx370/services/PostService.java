@@ -121,7 +121,7 @@ public class PostService {
         String sql = """
             select p.postId, p.content, 
                    date_format(p.createdAt, '%b %d, %Y %h:%i %p') as createdAt,
-                   u.userId, u.firstName, u.lastName
+                   u.userId, u.firstName, u.lastName,
             from post p
             join user u on p.userId = u.userId
             order by p.createdAt desc
@@ -143,11 +143,10 @@ public class PostService {
 
                 User user = new User(userId, firstName, lastName);
 
-                // Temporary values (until features implemented)
-                int heartsCount = 0;
-                int commentsCount = 0;
-                boolean isHearted = false;
-                boolean isBookmarked = false;
+                int heartsCount = rs.getInt("heartsCount");
+                int commentsCount = rs.getInt("commentsCount");
+                boolean isHearted = rs.getBoolean("isHearted");
+                boolean isBookmarked = rs.getBoolean("isBookmarked");
 
                 posts.add(new Post(
                         postId,
@@ -218,10 +217,10 @@ public class PostService {
                         rs.getString("content"),
                         rs.getString("createdAt"),
                         user,
-                        0,
-                        0,
-                        false,
-                        false
+                        rs.getInt("heartsCount"),
+                        rs.getInt("commentsCount"),
+                        rs.getBoolean("isHearted"),
+                        rs.getBoolean("isBookmarked")
                 ));
             }
         }
