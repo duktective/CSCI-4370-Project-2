@@ -118,6 +118,11 @@ public class PostService {
     public List<Post> retrievePosts() throws Exception {
         List<Post> posts = new ArrayList<>();
 
+        if (!userService.isAuthenticated()) {
+            return posts;
+        }
+
+        String loggedInUserId = userService.getLoggedInUser().getUserId();
         String sql = """
             select p.postId, p.content, 
                    date_format(p.createdAt, '%b %d, %Y %h:%i %p') as createdAt,
@@ -137,11 +142,15 @@ public class PostService {
             order by p.createdAt desc
         """;
 
+     
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+   
+            stmt.setString(1, loggedInUserId);
+            stmt.setString(2, loggedInUserId);
+   
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
 
                 String postId = rs.getString("postId");
                 String content = rs.getString("content");
@@ -170,6 +179,7 @@ public class PostService {
                 ));
             }
         }
+    }
         return posts;
     }
 
@@ -191,8 +201,13 @@ public class PostService {
             }
 
             String sql =
-            "select p.postId, p.content, p.createdAt, " +
-            "u.userId, u.firstName, u.lastName " +
+            "select p.postId, p.content, " + 
+            "date_format(p.createdAt, '%b %d, %Y %h:%i %p') as createdAt, " +
+            "u.userId, u.firstName, u.lastName, " +
+            "(select count(*) from postLike pl where pl.postId = p.postId) as heartsCount, " +
+            "(select count(*) from comment c where c.postId = p.postId) as commentsCount, " +
+            "exists(select 1 from postLike pl2 where pl2.postId = p.postId and pl2.userId = ?) as isHearted, " +
+            "exists(select 1 from bookmark b where b.postId = p.postId and b.userId = ?) as isBookmarked " +
             "from post p " +
             "join user u on p.userId = u.userId " +
             "join postHashtag ph on p.postId = ph.postId " +
@@ -206,6 +221,8 @@ public class PostService {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             int i = 1;
+            stmt.setString(i++, userService.getLoggedInUser().getUserId());
+            stmt.setString(i++, userService.getLoggedInUser().getUserId());
 
             for (int k = 0; k < tags.size(); k++) {
                 stmt.setString(i++, tags.get(k));
