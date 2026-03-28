@@ -122,6 +122,16 @@ public class PostService {
             select p.postId, p.content, 
                    date_format(p.createdAt, '%b %d, %Y %h:%i %p') as createdAt,
                    u.userId, u.firstName, u.lastName,
+            (select count(*) from postLike pl where pl.postId = p.postId) as heartsCount,
+            (select count(*) from comment c where c.postId = p.postId) as commentsCount,
+            exists(
+                select 1 from postLike pl2
+                where pl2.postId = p.postId and pl2.userId = ?
+            ) as isHearted,
+            exists(
+                select 1 from bookmark b
+                where b.postId = p.postId and b.userId = ?
+            ) as isBookmarked
             from post p
             join user u on p.userId = u.userId
             order by p.createdAt desc
